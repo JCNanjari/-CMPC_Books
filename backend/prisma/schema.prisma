@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Usuario que opera el inventario. La contraseña se guarda solo como hash.
+model User {
+  id        String     @id @default(uuid()) @db.Uuid
+  email     String     @unique
+  password  String
+  name      String
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Author {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  books     Book[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("authors")
+}
+
+model Publisher {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  books     Book[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("publishers")
+}
+
+model Genre {
+  id    String      @id @default(uuid()) @db.Uuid
+  name  String      @unique
+  books BookGenre[]
+
+  @@map("genres")
+}
+
+model Book {
+  id          String     @id @default(uuid()) @db.Uuid
+  title       String
+  price       Decimal    @db.Decimal(10, 2)
+  stock       Int
+  imageUrl    String?    @map("image_url")
+  authorId    String     @map("author_id") @db.Uuid
+  publisherId String     @map("publisher_id") @db.Uuid
+  deletedAt   DateTime?  @map("deleted_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  author      Author     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  publisher   Publisher  @relation(fields: [publisherId], references: [id], onDelete: Restrict)
+  genres      BookGenre[]
+
+  @@index([title])
+  @@index([authorId])
+  @@index([publisherId])
+  @@index([deletedAt])
+  @@index([stock])
+  @@index([price])
+  @@index([createdAt])
+  @@map("books")
+}
+
+model BookGenre {
+  bookId  String @map("book_id") @db.Uuid
+  genreId String @map("genre_id") @db.Uuid
+  book    Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  genre   Genre  @relation(fields: [genreId], references: [id], onDelete: Restrict)
+
+  @@id([bookId, genreId])
+  @@index([genreId])
+  @@map("book_genres")
+}
+
+/// Bitácora de operaciones de negocio: login, alta, edición, baja y exportación.
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  action    String
+  entity    String
+  entityId  String?  @map("entity_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  metadata  Json?
+  ip        String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

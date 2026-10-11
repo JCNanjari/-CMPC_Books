@@ -1,0 +1,12 @@
+{
+  "name": "cmpc-libros",
+  "private": true,
+  "description": "Inventario de la tienda CMPC Libros",
+  "scripts": {
+    "dev:db": "docker compose up -d db",
+    "dev:api": "npm run start:dev --prefix backend",
+    "dev:web": "npm run dev --prefix frontend",
+    "test": "npm test --prefix backend && npm test --prefix frontend",
+    "test:cov": "npm run test:cov --prefix backend && npm run test:cov --prefix frontend"
+  }
+}

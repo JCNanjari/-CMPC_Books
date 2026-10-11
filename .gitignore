@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.env
+*.log
+.DS_Store
+backend/dist/
+backend/coverage/
+backend/uploads/*
+!backend/uploads/.gitkeep
+frontend/dist/
+frontend/coverage/
+.idea/
+.vscode/
