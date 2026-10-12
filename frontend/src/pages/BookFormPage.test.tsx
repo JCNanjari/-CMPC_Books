@@ -1,7 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ApiError } from '../services/apiClient';
-import { createBook, getBook, updateBook } from '../services/bookService';
+import { createBook, getBook, listBooks, updateBook } from '../services/bookService';
 import { listAuthors, listGenres, listPublishers } from '../services/catalogService';
 import { renderApp } from '../test/render';
 
@@ -41,6 +41,10 @@ describe('formulario de libro', () => {
     vi.mocked(listAuthors).mockResolvedValue([{ id: 'a1', name: 'Cortázar' }]);
     vi.mocked(listPublishers).mockResolvedValue([{ id: 'p1', name: 'Alfaguara' }]);
     vi.mocked(getBook).mockResolvedValue(book);
+    vi.mocked(listBooks).mockResolvedValue({
+      data: [],
+      meta: { page: 1, limit: 10, total: 0, totalPages: 1 },
+    });
   });
 
   it('valida, pide la imagen y crea el libro', async () => {
@@ -80,12 +84,12 @@ describe('formulario de libro', () => {
 
     vi.mocked(createBook).mockRejectedValueOnce(new ApiError(400, 'El autor no existe'));
     await user.click(screen.getByRole('button', { name: 'Guardar' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('El autor no existe');
+    expect(await screen.findAllByText('El autor no existe')).toHaveLength(2);
 
-    vi.mocked(getBook).mockResolvedValue({ ...book, id: '9', title: 'Altazor' });
     vi.mocked(createBook).mockResolvedValueOnce({ ...book, id: '9', title: 'Altazor' });
     await user.click(screen.getByRole('button', { name: 'Guardar' }));
-    expect(await screen.findByRole('heading', { name: 'Altazor' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Libros' })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Libro agregado');
     expect(createBook).toHaveBeenCalled();
   });
 
@@ -96,6 +100,7 @@ describe('formulario de libro', () => {
     vi.mocked(updateBook).mockResolvedValue(book);
     await user.click(screen.getByRole('button', { name: 'Guardar' }));
     expect(await screen.findByRole('heading', { name: 'Rayuela' })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Libro actualizado');
     expect(updateBook).toHaveBeenCalled();
   });
 

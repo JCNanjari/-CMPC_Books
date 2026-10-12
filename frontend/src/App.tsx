@@ -5,6 +5,7 @@ import { AuthProvider } from './auth/AuthContext';
 import { ProtectedRoute } from './auth/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layout } from './components/Layout';
+import { ToastProvider } from './components/Toast';
 import { AuditPage } from './pages/AuditPage';
 import { BookDetailPage } from './pages/BookDetailPage';
 import { BookFormPage } from './pages/BookFormPage';
@@ -24,22 +25,24 @@ export function App() {
   return (
     <QueryClientProvider client={client}>
       <AuthProvider>
-        <ErrorBoundary>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route element={<ProtectedRoute />}>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Navigate to="/libros" replace />} />
-                <Route path="/libros" element={<BooksPage />} />
-                <Route path="/libros/nuevo" element={<BookFormPage />} />
-                <Route path="/libros/:id" element={<BookDetailPage />} />
-                <Route path="/libros/:id/editar" element={<BookFormPage />} />
-                <Route path="/auditoria" element={<AuditPage />} />
+        <ToastProvider>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route element={<ProtectedRoute />}>
+                <Route element={<Layout />}>
+                  <Route path="/" element={<Navigate to="/libros" replace />} />
+                  <Route path="/libros" element={<BooksPage />} />
+                  <Route path="/libros/nuevo" element={<BookFormPage />} />
+                  <Route path="/libros/:id" element={<BookDetailPage />} />
+                  <Route path="/libros/:id/editar" element={<BookFormPage />} />
+                  <Route path="/auditoria" element={<AuditPage />} />
+                </Route>
               </Route>
-            </Route>
-            <Route path="*" element={<Navigate to="/libros" replace />} />
-          </Routes>
-        </ErrorBoundary>
+              <Route path="*" element={<Navigate to="/libros" replace />} />
+            </Routes>
+          </ErrorBoundary>
+        </ToastProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

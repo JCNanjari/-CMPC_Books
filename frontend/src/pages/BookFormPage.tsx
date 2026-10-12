@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Cover } from '../components/Cover';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { useToast } from '../components/Toast';
 import {
   addGenreName,
   bookSchema,
@@ -32,6 +33,7 @@ export function BookFormPage() {
   const editing = Boolean(id);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const [image, setImage] = useState<File | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -73,7 +75,11 @@ export function BookFormPage() {
       await queryClient.invalidateQueries({ queryKey: ['authors'] });
       await queryClient.invalidateQueries({ queryKey: ['publishers'] });
       await queryClient.invalidateQueries({ queryKey: ['genres'] });
-      navigate(`/libros/${saved.id}`);
+      showToast(editing ? 'Libro actualizado' : 'Libro agregado');
+      navigate(editing ? `/libros/${saved.id}` : '/libros');
+    },
+    onError: (error) => {
+      showToast(messageOf(error), 'error');
     },
   });
 
